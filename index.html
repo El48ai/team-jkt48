@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEAM LOVE JKT48</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      color: white;
+      background: radial-gradient(circle at center, #ff4fa3, #130016 75%);
+    }
+
+    canvas {
+      position: fixed;
+      inset: 0;
+      display: block;
+      z-index: 1;
+    }
+
+    .title {
+      position: fixed;
+      top: 18px;
+      width: 100%;
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      text-shadow: 0 0 20px #ff7acb;
+      z-index: 5;
+      padding: 0 18px;
+    }
+
+    .video-box {
+      position: fixed;
+      top: 75px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 360px;
+      aspect-ratio: 16 / 9;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 0 30px #ff4fa3;
+      z-index: 5;
+      border: 2px solid rgba(255,255,255,0.4);
+      background: #000;
+    }
+
+    .video-box iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .subtitle {
+      position: fixed;
+      bottom: 82px;
+      width: 100%;
+      text-align: center;
+      font-size: 16px;
+      color: rgba(255,255,255,0.9);
+      z-index: 5;
+      padding: 0 20px;
+      line-height: 1.5;
+      text-shadow: 0 0 12px #ff4fa3;
+    }
+
+    .btn {
+      position: fixed;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      border: none;
+      padding: 13px 26px;
+      border-radius: 30px;
+      font-size: 15px;
+      font-weight: bold;
+      color: white;
+      background: linear-gradient(90deg, #ff2f92, #8b5cf6);
+      box-shadow: 0 0 25px #ff4fa3;
+      z-index: 6;
+    }
+
+    .btn:active {
+      transform: translateX(-50%) scale(0.95);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="title">TEAM LOVE JKT48</div>
+
+  <div class="video-box">
+    <iframe
+      src="https://www.youtube.com/embed/9iWB3ZuXOz8"
+      title="Lagu JKT48"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen>
+    </iframe>
+  </div>
+
+  <div class="subtitle">
+    Saat oshi tersenyum, dunia terasa lebih terang.
+  </div>
+
+  <button class="btn" onclick="boost()">Nyalakan Lightstick</button>
+
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    let w, h, center;
+    let particles = [];
+    let stars = [];
+    let hearts = [];
+    let pulse = 0;
+    let boostPower = 0;
+
+    let showMember = false;
+    let memberAlpha = 0;
+    let currentMember = -1;
+
+    const memberFiles = [
+      "member1.jpg",
+      "member2.jpg",
+      "member3.jpg",
+      "member4.jpg",
+      "member5.jpg",
+      "member6.jpg",
+      "member7.jpg",
+      "member8.jpg",
+      "member9.jpg",
+      "member10.jpg",
+      "member11.jpg",
+      "member12.jpg",
+      "member13.jpg",
+      "member14.jpg",
+      "member15.jpg"
+    ];
+
+    const memberImages = memberFiles.map(file => {
+      const img = new Image();
+      img.src = file;
+      return img;
+    });
+
+    function resize() {
+      w = canvas.width = innerWidth;
+      h = canvas.height = innerHeight;
+      center = { x: w / 2, y: h / 2 + 35 };
+    }
+
+    resize();
+    addEventListener("resize", resize);
+
+    for (let i = 0; i < 170; i++) {
+      particles.push({
+        angle: Math.random() * Math.PI * 2,
+        radius: Math.random() * 300 + 50,
+        speed: Math.random() * 0.012 + 0.003,
+        size: Math.random() * 3 + 1,
+        color: Math.random() > 0.5 ? "#ff4fa3" : "#ffffff"
+      });
+    }
+
+    for (let i = 0; i < 130; i++) {
+      stars.push({
+        x: Math.random() * innerWidth,
+        y: Math.random() * innerHeight,
+        size: Math.random() * 2 + 0.5,
+        speed: Math.random() * 0.5 + 0.15
+      });
+    }
+
+    function boost() {
+      boostPower = 130;
+      showMember = true;
+      memberAlpha = 1;
+
+      currentMember++;
+      if (currentMember >= memberImages.length) {
+        currentMember = 0;
+      }
+
+      for (let i = 0; i < 55; i++) {
+        hearts.push({
+          x: center.x + (Math.random() - 0.5) * 260,
+          y: center.y + (Math.random() - 0.5) * 170,
+          size: Math.random() * 22 + 14,
+          speed: Math.random() * 2.8 + 1,
+          alpha: 1,
+          drift: (Math.random() - 0.5) * 2.5
+        });
+      }
+    }
+
+    function drawBackground() {
+      const gradient = ctx.createRadialGradient(
+        center.x, center.y, 0,
+        center.x, center.y, Math.max(w, h)
+      );
+
+      gradient.addColorStop(0, "#ff7acb");
+      gradient.addColorStop(0.35, "#4b104f");
+      gradient.addColorStop(1, "#07000a");
+
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    function drawStars() {
+      stars.forEach(s => {
+        s.y += s.speed;
+
+        if (s.y > h) {
+          s.y = 0;
+          s.x = Math.random() * w;
+        }
+
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255,255,255,0.65)";
+        ctx.fill();
+      });
+    }
+
+    function drawLightstickWave() {
+      ctx.beginPath();
+
+      for (let x = 0; x < w; x++) {
+        const y =
+          center.y + 210 +
+          Math.sin(x * 0.025 + pulse * 2.5) * 22 +
+          Math.sin(x * 0.01 + pulse) * 30;
+
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+
+      ctx.strokeStyle = "rgba(255,255,255,0.7)";
+      ctx.lineWidth = 2;
+      ctx.shadowColor = "#ff4fa3";
+      ctx.shadowBlur = 20;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+
+    function drawMemberPhoto(radius) {
+      if (!showMember) return;
+
+      const img = memberImages[currentMember];
+      if (!img || !img.complete) return;
+
+      const size = radius * 2;
+
+      const imgRatio = img.width / img.height;
+      let sx, sy, sw, sh;
+
+      if (imgRatio > 1) {
+        sh = img.height;
+        sw = img.height;
+        sx = (img.width - sw) / 2;
+        sy = 0;
+      } else {
+        sw = img.width;
+        sh = img.width;
+        sx = 0;
+        sy = (img.height - sh) / 2;
+      }
+
+      ctx.save();
+      ctx.globalAlpha = memberAlpha;
+
+      ctx.beginPath();
+      ctx.arc(center.x, center.y, radius, 0, Math.PI * 2);
+      ctx.clip();
+
+      ctx.drawImage(
+        img,
+        sx, sy, sw, sh,
+        center.x - radius,
+        center.y - radius,
+        size,
+        size
+      );
+
+      ctx.restore();
+
+      ctx.save();
+      ctx.globalAlpha = memberAlpha;
+      ctx.beginPath();
+      ctx.arc(center.x, center.y, radius + 5, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(255,255,255,0.95)";
+      ctx.lineWidth = 4;
+      ctx.shadowColor = "#ffffff";
+      ctx.shadowBlur = 24;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawCore() {
+      pulse += 0.045;
+
+      const glow = 85 + Math.sin(pulse) * 15 + boostPower;
+
+      const gradient = ctx.createRadialGradient(
+        center.x, center.y, 10,
+        center.x, center.y, glow
+      );
+
+      gradient.addColorStop(0, "rgba(255,255,255,1)");
+      gradient.addColorStop(0.3, "rgba(255,79,163,0.95)");
+      gradient.addColorStop(1, "rgba(255,79,163,0)");
+
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(center.x, center.y, glow, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(center.x, center.y, 82 + Math.sin(pulse) * 8, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(255,255,255,0.9)";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(center.x, center.y, 118 + Math.cos(pulse) * 10, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(255,79,163,0.55)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      if (showMember) {
+        drawMemberPhoto(76);
+      } else {
+        ctx.font = "bold 36px Arial";
+        ctx.fillStyle = "white";
+        ctx.textAlign = "center";
+        ctx.shadowColor = "#ff4fa3";
+        ctx.shadowBlur = 25;
+        ctx.fillText("JKT48", center.x, center.y + 12);
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    function drawParticles() {
+      particles.forEach(p => {
+        p.angle += p.speed;
+        let r = p.radius + Math.sin(pulse + p.radius) * 18 + boostPower;
+
+        const x = center.x + Math.cos(p.angle) * r;
+        const y = center.y + Math.sin(p.angle) * r;
+
+        ctx.beginPath();
+        ctx.moveTo(center.x, center.y);
+        ctx.lineTo(x, y);
+        ctx.strokeStyle = p.color === "#ffffff"
+          ? "rgba(255,255,255,0.16)"
+          : "rgba(255,79,163,0.22)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(x, y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 16;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+    }
+
+    function drawHearts() {
+      hearts.forEach((heart, index) => {
+        heart.y -= heart.speed;
+        heart.x += heart.drift;
+        heart.alpha -= 0.01;
+
+        ctx.font = heart.size + "px Arial";
+        ctx.textAlign = "center";
+        ctx.globalAlpha = heart.alpha;
+        ctx.shadowColor = "#ff4fa3";
+        ctx.shadowBlur = 18;
+        ctx.fillText("❤", heart.x, heart.y);
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
+
+        if (heart.alpha <= 0) {
+          hearts.splice(index, 1);
+        }
+      });
+    }
+
+    function animate() {
+      drawBackground();
+      drawStars();
+      drawLightstickWave();
+      drawParticles();
+      drawCore();
+      drawHearts();
+
+      if (boostPower > 0) boostPower *= 0.92;
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
+
+</body>
+</html>
